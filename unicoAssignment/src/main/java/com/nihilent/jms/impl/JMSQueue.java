@@ -4,6 +4,7 @@
 package com.nihilent.jms.impl;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.jms.Connection;
@@ -15,6 +16,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
+import javax.jms.QueueBrowser;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.naming.InitialContext;
@@ -134,18 +136,23 @@ public class JMSQueue {
 		try {
 			connection = connectionFactory.createConnection();
 			session = connection.createSession(false,
-					Session.CLIENT_ACKNOWLEDGE);
+					Session.AUTO_ACKNOWLEDGE);
 			Destination dest = queue;
-			MessageConsumer consumer = session.createConsumer(dest);
+			//MessageConsumer consumer = session.createConsumer(dest);
+			
+			QueueBrowser queueBrowser = session.createBrowser(queue); 
+			
 			connection.start();
-			while (true) {
-				Message m = consumer.receive(1000);
-				if (m != null) {
-					ObjectMessage message = (ObjectMessage) m;
+			Enumeration messageEnumeration = queueBrowser.getEnumeration();
+			while (messageEnumeration.hasMoreElements()) {
+				//Message m = consumer.receive(1000);
+				ObjectMessage message = (ObjectMessage)messageEnumeration.nextElement();
+//				if (m != null) {
+//					ObjectMessage message = (ObjectMessage) m;
 					messageList.add((Integer) message.getObject());
-				} else {
-					break;
-				}
+//				} else {
+//					break;
+//				}
 			}
 
 		} catch (Exception ex) {
