@@ -12,16 +12,18 @@ Configuration of message queue for wildfly server as below.
 
 Exposed web services
 
-    Rest web services
+    Rest web services -
 
     1. Exposed via jax_rs (Web module)
 
         Class Name: com.nihilent.rest.RestService
         URL       : http://{host}:{port}/unicoAssignment/restService
 
-    Soap web services
+    Soap web services -
 
     1. Exposed via jax_rs (Web module)
 
         Class Name: com.nihilent.soap
         URL       : http://{host}:{port}/unicoAssignment/SoapService?wsdl
+
+
