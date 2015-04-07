@@ -21,13 +21,17 @@ import com.nihilent.jms.impl.JMSQueue;
 @Path("restService")
 public class RestService {
 
+	/**
+	 * Send messaged to queue
+	 * @param i1
+	 * @param i2
+	 * @return
+	 */
 	@PUT
 	@Produces("application/json")
 	@Path("push/{int1}/{int2}")
 	public String push(@PathParam("int1") int i1, @PathParam("int2") int i2) {
-		String status = null;
-
-		System.out.println("Input values are :: " + i1 + " : " + i2);
+		String status = "failure";
 
 		List<Integer> messageList = new ArrayList<Integer>();
 
@@ -36,13 +40,15 @@ public class RestService {
 
 		JMSQueue jmsQueue = JMSQueue.getInstance();
 
-		status = jmsQueue.sendMessage(messageList);
-
-		status = "success";
+		status = jmsQueue.sendMessage(messageList, jmsQueue.getIntegerListQueue());
 
 		return status;
 	}
 
+	/**
+	 * Returns list of all the messages available in queue
+	 * @return
+	 */
 	@GET
 	@Produces("application/json")
 	@Path("list")
@@ -51,7 +57,7 @@ public class RestService {
 
 		JMSQueue jmsQueue = JMSQueue.getInstance();
 
-		messageList = jmsQueue.readAllMessage();
+		messageList = jmsQueue.readAllMessage(jmsQueue.getIntegerListQueue());
 
 		return messageList;
 	}

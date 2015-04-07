@@ -30,14 +30,13 @@ public class JMSQueue {
 
 	private static JMSQueue jmsQueue = null;
 
-	
-	private Queue queue;
+	private Queue integerListQueue;
 
-	
+	private Queue gcdListQueue;
+
 	private ConnectionFactory connectionFactory;
-	
-	
-	public static JMSQueue getInstance() {
+
+	public static synchronized JMSQueue getInstance() {
 		if (jmsQueue == null) {
 			jmsQueue = new JMSQueue();
 		}
@@ -53,13 +52,21 @@ public class JMSQueue {
 			InitialContext jndi = new InitialContext();
 			connectionFactory = (QueueConnectionFactory) jndi
 					.lookup(Constants.JMS_QUEUE_CONNECTION_FACTORY);
-			queue = (Queue) jndi.lookup(Constants.JMS_QUEUE_NAME);
+			integerListQueue = (Queue) jndi.lookup(Constants.JMS_QUEUE_NAME);
+			gcdListQueue = (Queue) jndi
+					.lookup(Constants.JMS_GCD_LIST_QUEUE_NAME);
 		} catch (NamingException ex) {
 			ex.printStackTrace();
 		}
 	}
 
-	public String sendMessage(List<Integer> messageList) {
+	/**
+	 * This method sends the messages from List to specified queue 
+	 * @param messageList list of messages need to send
+	 * @param queue Queue from where messages to be read
+	 * @return
+	 */
+	public String sendMessage(List<Integer> messageList, Queue queue) {
 		String status = "failure";
 		Connection connection = null;
 		Session session = null;
@@ -81,7 +88,13 @@ public class JMSQueue {
 		return status;
 	}
 
-	public List<Integer> readMessage(int numberOfMesages) {
+	/**
+	 * This method reads the specified number of messages from specified queue 
+	 * @param numberOfMesages number of messages to read
+	 * @param queue Queue from where messages to be read
+	 * @return
+	 */
+	public List<Integer> readMessage(int numberOfMesages, Queue queue) {
 		List<Integer> messageList = new ArrayList<Integer>();
 		Connection connection = null;
 		Session session = null;
@@ -109,13 +122,19 @@ public class JMSQueue {
 		return messageList;
 	}
 
-	public List<Integer> readAllMessage() {
+	/**
+	 * This method reads the all messages from specified queue
+	 * @param queue Queue from where messages to be read
+	 * @return
+	 */
+	public List<Integer> readAllMessage(Queue queue) {
 		List<Integer> messageList = new ArrayList<Integer>();
 		Connection connection = null;
 		Session session = null;
 		try {
 			connection = connectionFactory.createConnection();
-			session = connection.createSession(false, Session.CLIENT_ACKNOWLEDGE);
+			session = connection.createSession(false,
+					Session.CLIENT_ACKNOWLEDGE);
 			Destination dest = queue;
 			MessageConsumer consumer = session.createConsumer(dest);
 			connection.start();
@@ -137,9 +156,8 @@ public class JMSQueue {
 		}
 		return messageList;
 	}
-	
-	
-	private void closeConnections(Session session, Connection connection){
+
+	private void closeConnections(Session session, Connection connection) {
 		if (session != null) {
 			try {
 				session.close();
@@ -154,6 +172,20 @@ public class JMSQueue {
 				ex.printStackTrace();
 			}
 		}
+	}
+
+	/**
+	 * @return the integerListQueue
+	 */
+	public Queue getIntegerListQueue() {
+		return integerListQueue;
+	}
+
+	/**
+	 * @return the gcdListQueue
+	 */
+	public Queue getGcdListQueue() {
+		return gcdListQueue;
 	}
 
 }

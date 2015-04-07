@@ -19,13 +19,21 @@ import com.nihilent.util.MathUtil;
 @WebService
 public class SoapService {
 
+	/**
+	 * Computes and returns the GCD of the first 2 Integers from the queue
+	 * messages, also send it to another queue.
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	@WebMethod
 	public int gcd() throws Exception {
 		int gcdNumber = 0;
 		JMSQueue jmsQueue = JMSQueue.getInstance();
 		try {
-			List<Integer> messageList = jmsQueue.readMessage(2);
-			System.out.println(" messageList : " + messageList);
+			List<Integer> messageList = jmsQueue.readMessage(2,
+					jmsQueue.getIntegerListQueue());
+
 			if (messageList != null && !messageList.isEmpty()) {
 				if (messageList.size() == 2) {
 					gcdNumber = MathUtil.gcd(messageList.get(0),
@@ -33,6 +41,10 @@ public class SoapService {
 				} else {
 					gcdNumber = MathUtil.gcd(messageList.get(0), 0);
 				}
+				List<Integer> gcdList = new ArrayList<Integer>();
+				gcdList.add(gcdNumber);
+				String status = jmsQueue.sendMessage(gcdList,
+						jmsQueue.getGcdListQueue());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -40,56 +52,51 @@ public class SoapService {
 		return gcdNumber;
 	}
 
+	/**
+	 * Returns the list of computed GCDs
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	@WebMethod
 	public List<Integer> gcdList() throws Exception {
 
 		List<Integer> result = new ArrayList<Integer>();
 		try {
 			JMSQueue jmsQueue = JMSQueue.getInstance();
-			List<Integer> messageList = jmsQueue.readAllMessage();
+			List<Integer> messageList = jmsQueue.readAllMessage(jmsQueue
+					.getGcdListQueue());
 
-			System.out.println(" messageList : " + messageList);
 			if (messageList != null && !messageList.isEmpty()) {
-				int i = 0;
-				while (i < messageList.size()) {
-					if (i == messageList.size()) {
-						result.add((Integer) MathUtil.gcd(messageList.get(i), 0));
-					} else {
-						result.add((Integer) MathUtil.gcd(messageList.get(i),
-								messageList.get(i + 1)));
-					}
-
-					i = i + 2;
-				}
+				result = messageList;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		return result;
 	}
 
+	/**
+	 * Returns the sum of all computed GCDs
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
 	@WebMethod
 	public int gcdSum() throws Exception {
 		int sum = 0, i = 0;
 		try {
 			JMSQueue jmsQueue = JMSQueue.getInstance();
-			List<Integer> messageList = jmsQueue.readAllMessage();
-			System.out.println(" messageList : " + messageList);
+			List<Integer> messageList = jmsQueue.readAllMessage(jmsQueue
+					.getGcdListQueue());
+
 			if (messageList != null && !messageList.isEmpty()) {
-				while (i < messageList.size()) {
-					if (i == messageList.size()) {
-						sum = sum
-								+ (Integer) MathUtil.gcd(messageList.get(i), 0);
-					} else {
-						sum = sum
-								+ (Integer) MathUtil.gcd(messageList.get(i),
-										messageList.get(i + 1));
-					}
-					i = i + 2;
-				}
+				for (Integer gcdNumber : messageList)
+					sum = sum + gcdNumber;
+
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 
 		return sum;
