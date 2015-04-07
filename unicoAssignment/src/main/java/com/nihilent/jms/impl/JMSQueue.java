@@ -76,20 +76,7 @@ public class JMSQueue {
 		} catch (JMSException ex) {
 			ex.printStackTrace();
 		} finally {
-			if (session != null) {
-				try {
-					session.close();
-				} catch (JMSException e) {
-					e.printStackTrace();
-				}
-			}
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (JMSException ex) {
-					ex.printStackTrace();
-				}
-			}
+			closeConnections(session, connection);
 		}
 		return status;
 	}
@@ -117,20 +104,7 @@ public class JMSQueue {
 			ex.printStackTrace();
 
 		} finally {
-			if (session != null) {
-				try {
-					session.close();
-				} catch (JMSException e) {
-					e.printStackTrace();
-				}
-			}
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (JMSException ex) {
-					ex.printStackTrace();
-				}
-			}
+			closeConnections(session, connection);
 		}
 		return messageList;
 	}
@@ -159,22 +133,27 @@ public class JMSQueue {
 			ex.printStackTrace();
 
 		} finally {
-			if (session != null) {
-				try {
-					session.close();
-				} catch (JMSException e) {
-					e.printStackTrace();
-				}
-			}
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (JMSException ex) {
-					ex.printStackTrace();
-				}
-			}
+			closeConnections(session, connection);
 		}
 		return messageList;
+	}
+	
+	
+	private void closeConnections(Session session, Connection connection){
+		if (session != null) {
+			try {
+				session.close();
+			} catch (JMSException e) {
+				e.printStackTrace();
+			}
+		}
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (JMSException ex) {
+				ex.printStackTrace();
+			}
+		}
 	}
 
 }
